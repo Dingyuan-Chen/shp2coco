@@ -15,7 +15,7 @@ If you need to visualize annotations, try the following:<br>
 `python visualize_coco.py`<br>
 
 ## Example:
-
+![](https://github.com/DuncanChen2018/shp2coco/tree/master/example_data/example.png)
 
 ## Thanks to the Third Party Libs
 [geotool](https://github.com/Kindron/geotool)<br>
