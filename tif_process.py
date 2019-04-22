@@ -95,8 +95,8 @@ class GeoTiff(object):
         count = 1
         for i in range(row_num):
             for j in range(col_num):
-                if begin_id+i*col_num+j in self.mark:
-                    continue
+                # if begin_id+i*col_num+j in self.mark:
+                #     continue
                 clipped_image = np.array(self[i * clip_size: (i + 1) * clip_size, j * clip_size: (j + 1) * clip_size])
                 clipped_image = clipped_image.astype(np.int8)
 
@@ -108,6 +108,8 @@ class GeoTiff(object):
                     count += 1
                 except Exception:
                     raise IOError('clip failed!%d' % count)
+
+        return row_num * col_num
 
     def clip_mask_with_grid(self, clip_size, begin_id, out_dir):
         """
@@ -131,16 +133,16 @@ class GeoTiff(object):
         if gtiffDriver is None:
             raise ValueError("Can't find GeoTiff Driver")
 
-        self.mark = []
+        # self.mark = []
 
         count = 1
         for i in range(row_num):
             for j in range(col_num):
                 clipped_image = np.array(self.mask[0, i * clip_size: (i + 1) * clip_size, j * clip_size: (j + 1) * clip_size])
                 ins_list = np.unique(clipped_image)
-                if len(ins_list) <= 1:
-                    self.mark.append(begin_id+i*col_num+j)
-                    continue
+                # if len(ins_list) <= 1:
+                #     self.mark.append(begin_id+i*col_num+j)
+                #     continue
                 ins_list = ins_list[1:]
                 for id in range(len(ins_list)):
                     bg_img = np.zeros((clipped_image.shape)).astype(np.int8)
@@ -258,7 +260,8 @@ class GeoTiff(object):
     def clip_tif_and_shapefile(self, clip_size, begin_id, shapefile_path, out_dir):
         self.mask_tif_with_shapefile(shapefile_path)
         self.clip_mask_with_grid(clip_size=clip_size, begin_id=begin_id, out_dir=out_dir + '/annotations')
-        self.clip_tif_with_grid(clip_size=clip_size, begin_id=begin_id, out_dir=out_dir + '/greenhouse_2019')
+        pic_id = self.clip_tif_with_grid(clip_size=clip_size, begin_id=begin_id, out_dir=out_dir + '/greenhouse_2019')
+        return pic_id
 
 def channel_first_to_last(image):
     """
@@ -370,6 +373,18 @@ class GeoShaplefile(object):
             # feature type
             self.feature_type = geom.GetGeometryName()
 
+def clip_from_file(clip_size, root, img_path, shp_path):
+    img_list = os.listdir(root + '/' + img_path)
+    n_img = len(img_list)
+    pic_id = 0
+    for i in range(n_img):
+        tif = GeoTiff(root + '/' + img_path + '/' + img_list[i])
+        img_id = img_list[i].split('.', 1)[0]
+        pic_num = tif.clip_tif_and_shapefile(clip_size, pic_id, root + '/' + shp_path + '/' + img_id + '/' + img_id + '.shp', root + '/dataset')
+        pic_id += pic_num
+
 if __name__ == '__main__':
-    tif = GeoTiff('./example_data/21.tif')
-    tif.clip_tif_and_shapefile(512, 0, './example_data/21.shp', './example_data/dataset')
+    root = r'./example_data/original_data'
+    img_path = 'img'
+    shp_path = 'shp'
+    clip_from_file(512, root, img_path, shp_path)
