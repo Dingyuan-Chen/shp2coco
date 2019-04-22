@@ -4,7 +4,8 @@ shp2coco is a tool to help create `COCO` datasets from `.shp` file (ArcGIS forma
 It includes:<br>
 1:mask tif with shape file.<br>
 2:crop tif and mask.<br>
-3:generate annotations in uncompressed RLE ("crowd") and polygons in the format COCO requires.<br>
+3:slice the dataset into training, eval and test subset.<br>
+4:generate annotations in uncompressed RLE ("crowd") and polygons in the format COCO requires.<br>
 
 This project is based on [geotool](https://github.com/Kindron/geotool) and [pycococreator](https://github.com/waspinator/pycococreator)
 
